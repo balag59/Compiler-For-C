@@ -16,21 +16,24 @@ class Token(object):
 class Scanner(object):
     def __init__(self,prog_name):
         self.prog_name = prog_name
+        global f
+        f = open(self.prog_name,'r')
 
     def has_more_tokens(self):
-        if f.readline() != '':
-            print('true')
+        global ch
+        ch = f.read(1)
+        if ch != '':
             return True
         else:
-            print('false')
+            f.close()
             return False
 
     def get_next_token(self):
-        #print('get_next_token')
+        if ch == '\n':
+            print('end of line')
 
 
-scanner = Scanner("foo.c")
-f = open(scanner.prog_name,'r')
+scanner = Scanner("foo1.c")
 while scanner.has_more_tokens():
     scanner.get_next_token()
     t = Token()
