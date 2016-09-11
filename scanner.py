@@ -57,6 +57,10 @@ class Scanner(object):
                next_ch = f.read(1)
                if next_ch == '"':
                    t.name += next_ch
+                   while True:
+                       next_ch = f.read(1)
+                       if next_ch == '\n':
+                           break                            
                    break
                else:
                  t.name += next_ch
