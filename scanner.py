@@ -38,6 +38,7 @@ class Scanner(object):
                   break
               else:
                 t.name += next_ch
+            return t
         elif current_ch == '/':
              next_ch = f.read(1)
              if next_ch == '/':
@@ -46,10 +47,10 @@ class Scanner(object):
                while True:
                  next_ch = f.read(1)
                  if next_ch == '\n':
-                     t.name += next_ch
                      break
                  else:
                      t.name += next_ch
+             return t
         elif current_ch == '"':
              t.name = current_ch
              t.type  = "string"
@@ -57,14 +58,21 @@ class Scanner(object):
                next_ch = f.read(1)
                if next_ch == '"':
                    t.name += next_ch
+                   end_ch = ' '
                    while True:
-                       next_ch = f.read(1)
-                       if next_ch == '\n':
-                           break                            
+                       if (end_ch == ' '):
+                            end_ch = f.read(1)
+                       else:
+                           break
                    break
                else:
                  t.name += next_ch
-        return t
+             return t
+        #elif current_ch
+        else:
+              t.type = "unknown"
+              t.name  = "error"
+              return t
 
 
 scanner = Scanner("foo1.c")
