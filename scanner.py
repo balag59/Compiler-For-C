@@ -1,3 +1,5 @@
+import sys
+
 reserve_word_list = ["int","void","if","while","return","read","write","print","continue","break","binary","decimal"]
 symbol_list = ["(",")","{","}","[","]",",",";","+","-","*","==","!=",">=","<=","<",">","=","&&","||"]
 
@@ -143,7 +145,8 @@ class Scanner(object):
               t.name  = "error"
               return t
 
-scanner = Scanner("foo.c")
+
+scanner = Scanner(sys.argv[1])
 while scanner.has_more_tokens():
     t = scanner.get_next_token()
     if ((t.get_token_type() == "identifier") and (t.get_token_name() != "main")):
