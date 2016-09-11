@@ -7,28 +7,38 @@ class Token(object):
         self.name = ""
 
     def get_token_type(self):
-        if self.type != "delimiters":
-           print(self.type)
         return self.type
 
     def get_token_name(self):
-        if self.type != "delimiters":
-          print(self.name)
         return self.name
+
+    def print_token(self):
+        f_write.write(self.name)
 
 class Scanner(object):
     def __init__(self,prog_name):
         self.prog_name = prog_name
-        global f
-        f = open(self.prog_name,'r')
+        global f_read
+        f_read= open(self.prog_name,'r')
+        temp_name = prog_name.split('.')
+        global newprog_name
+        newprog_name = " "
+        newprog_name = temp_name[0] + '_gen' + '.' + temp_name[1]
+        global f_write
+        f_write = open(newprog_name,'a')
+
+
+
+
 
     def has_more_tokens(self):
         global current_ch
-        current_ch = f.read(1)
+        current_ch = f_read.read(1)
         if current_ch != '':
             return True
         else:
-            f.close()
+            f_read.close()
+            f_write.close()
             return False
 
     def get_next_token(self):
@@ -38,41 +48,41 @@ class Scanner(object):
             t.name = current_ch
             t.type  = "meta statement"
             while True:
-              next_ch = f.read(1)
+              next_ch = f_read.read(1)
               if next_ch == '\n':
-                  current_pos = f.tell()
+                  current_pos = f_read.tell()
                   current_pos -= 1
-                  f.seek(current_pos)
+                  f_read.seek(current_pos)
                   break
               else:
                 t.name += next_ch
             return t
         elif current_ch == '/':
-             next_ch = f.read(1)
+             next_ch = f_read.read(1)
              if next_ch == '/':
                t.name = "//"
                t.type  = "meta statement"
                while True:
-                 next_ch = f.read(1)
+                 next_ch = f_read.read(1)
                  if next_ch == '\n':
-                     current_pos = f.tell()
+                     current_pos = f_read.tell()
                      current_pos -= 1
-                     f.seek(current_pos)
+                     f_read.seek(current_pos)
                      break
                  else:
                      t.name += next_ch
              else:
                  t.type  = "symbol"
                  t.name = '/'
-                 current_pos = f.tell()
+                 current_pos = f_read.tell()
                  current_pos -= 1
-                 f.seek(current_pos)
+                 f_read.seek(current_pos)
              return t
         elif current_ch == '"':
              t.name = current_ch
              t.type  = "string"
              while True:
-               next_ch = f.read(1)
+               next_ch = f_read.read(1)
                if next_ch == '"':
                    t.name += next_ch
                    break
@@ -83,11 +93,11 @@ class Scanner(object):
             t.name = current_ch
             t.type = "identifier"
             while True:
-                next_ch = f.read(1)
+                next_ch = f_read.read(1)
                 if not(next_ch.isalnum()):
-                    current_pos = f.tell()
+                    current_pos = f_read.tell()
                     current_pos -= 1
-                    f.seek(current_pos)
+                    f_read.seek(current_pos)
                     break
                 else:
                     t.name += next_ch
@@ -99,11 +109,11 @@ class Scanner(object):
             t.name = current_ch
             t.type = "identifier"
             while True:
-                next_ch = f.read(1)
+                next_ch = f_read.read(1)
                 if not(next_ch.isalnum()):
-                    current_pos = f.tell()
+                    current_pos = f_read.tell()
                     current_pos -= 1
-                    f.seek(current_pos)
+                    f_read.seek(current_pos)
                     break
                 else:
                     t.name += next_ch
@@ -113,7 +123,7 @@ class Scanner(object):
             t.name = current_ch
             return t
         else:
-              next_ch = f.read(1)
+              next_ch = f_read.read(1)
               for symbol in symbol_list:
                   if current_ch + next_ch == symbol:
                       t.type = "symbol"
@@ -123,9 +133,9 @@ class Scanner(object):
                   elif current_ch == symbol:
                       t.type = "symbol"
                       t.name = current_ch
-                      current_pos = f.tell()
+                      current_pos = f_read.tell()
                       current_pos -= 1
-                      f.seek(current_pos)
+                      f_read.seek(current_pos)
                       return t
                       break
               t.type = "unknown"
@@ -135,5 +145,5 @@ class Scanner(object):
 scanner = Scanner("foo1.c")
 while scanner.has_more_tokens():
     t = scanner.get_next_token()
-    t.get_token_type()
-    t.get_token_name()
+    #if ((t.get_token_type() == "identifier") and (t.get_token_name() != "main")):
+    t.print_token()
