@@ -1,3 +1,6 @@
+reserve_word_list = ["int","void","if","while","return","read","write","print","continue","break","binary","decimal"]
+symbol_list = ["(",")","{","}","[","]",",",";","+","-","*","==","!=",">",">=","<","<=","=","&&","||"]
+
 class Token(object):
     def __init__(self):
         self.type = ""
@@ -88,6 +91,9 @@ class Scanner(object):
                     break
                 else:
                     t.name += next_ch
+            for word in reserve_word_list:
+                if t.name == word:
+                    t.type = "reserved word"
             return t
         elif current_ch == '_':
             t.name = current_ch
