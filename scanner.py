@@ -40,9 +40,9 @@ class Scanner(object):
             while True:
               next_ch = f.read(1)
               if next_ch == '\n':
-                  cur_pos = f.tell()
-                  cur_pos -= 1
-                  f.seek(cur_pos)
+                  current_pos = f.tell()
+                  current_pos -= 1
+                  f.seek(current_pos)
                   break
               else:
                 t.name += next_ch
@@ -55,18 +55,18 @@ class Scanner(object):
                while True:
                  next_ch = f.read(1)
                  if next_ch == '\n':
-                     cur_pos = f.tell()
-                     cur_pos -= 1
-                     f.seek(cur_pos)
+                     current_pos = f.tell()
+                     current_pos -= 1
+                     f.seek(current_pos)
                      break
                  else:
                      t.name += next_ch
              else:
                  t.type  = "symbol"
                  t.name = '/'
-                 cur_pos = f.tell()
-                 cur_pos -= 1
-                 f.seek(cur_pos)
+                 current_pos = f.tell()
+                 current_pos -= 1
+                 f.seek(current_pos)
              return t
         elif current_ch == '"':
              t.name = current_ch
@@ -85,9 +85,9 @@ class Scanner(object):
             while True:
                 next_ch = f.read(1)
                 if not(next_ch.isalnum()):
-                    cur_pos = f.tell()
-                    cur_pos -= 1
-                    f.seek(cur_pos)
+                    current_pos = f.tell()
+                    current_pos -= 1
+                    f.seek(current_pos)
                     break
                 else:
                     t.name += next_ch
@@ -101,9 +101,9 @@ class Scanner(object):
             while True:
                 next_ch = f.read(1)
                 if not(next_ch.isalnum()):
-                    cur_pos = f.tell()
-                    cur_pos -= 1
-                    f.seek(cur_pos)
+                    current_pos = f.tell()
+                    current_pos -= 1
+                    f.seek(current_pos)
                     break
                 else:
                     t.name += next_ch
@@ -113,11 +113,16 @@ class Scanner(object):
             t.name = current_ch
             return t
         else:
+              for symbol in symbol_list:
+                  if current_ch == symbol:
+                      t.name = current_ch
+                      t.type = "symbol"
+                      #next_ch = f.read(1)
+                      return t
+                      break
               t.type = "unknown"
               t.name  = "error"
               return t
-
-
 
 scanner = Scanner("foo1.c")
 while scanner.has_more_tokens():
