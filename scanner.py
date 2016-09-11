@@ -4,14 +4,12 @@ class Token(object):
         self.name = ""
 
     def get_token_type(self):
-        #print('get_token_type')
-        self.type = "ID"
-        #print(self.type)
+        print(self.type)
+        return self.type
 
     def get_token_name(self):
-        #print('get_token_name')
-        self.name = "name"
-        #print(self.name)
+        print(self.name)
+        return self.name
 
 class Scanner(object):
     def __init__(self,prog_name):
@@ -20,22 +18,53 @@ class Scanner(object):
         f = open(self.prog_name,'r')
 
     def has_more_tokens(self):
-        global ch
-        ch = f.read(1)
-        if ch != '':
+        global current_ch
+        current_ch = f.read(1)
+        if current_ch != '':
             return True
         else:
             f.close()
             return False
 
     def get_next_token(self):
-        if ch == '\n':
-            print('end of line')
+        global current_ch
+        t = Token()
+        if current_ch == '#':
+            t.name = current_ch
+            t.type  = "meta"
+            while True:
+              next_ch = f.read(1)
+              if next_ch == '\n':
+                  break
+              else:
+                t.name += next_ch
+        elif current_ch == '/':
+             next_ch = f.read(1)
+             if next_ch == '/':
+               t.name = "//"
+               t.type  = "meta"
+               while True:
+                 next_ch = f.read(1)
+                 if next_ch == '\n':
+                     t.name += next_ch
+                     break
+                 else:
+                     t.name += next_ch
+        elif current_ch == '"':
+             t.name = current_ch
+             t.type  = "string"
+             while True:
+               next_ch = f.read(1)
+               if next_ch == '"':
+                   t.name += next_ch
+                   break
+               else:
+                 t.name += next_ch
+        return t
 
 
 scanner = Scanner("foo1.c")
 while scanner.has_more_tokens():
-    scanner.get_next_token()
-    t = Token()
-    t.get_token_name()
+    t = scanner.get_next_token()
     t.get_token_type()
+    t.get_token_name()
