@@ -124,6 +124,27 @@ class Scanner(object):
                 else:
                     t.name += next_ch
             return t
+        elif current_ch.isdigit():
+            t.name = current_ch
+            t.type = "number"
+            while True:
+                next_ch = f_read.read(1)
+                if not(next_ch.isdigit()):
+                    if(next_ch.isalpha() or next_ch == '_'):
+                       t.type = "unknown"
+                       t.name  = "error"
+                       print('Input program contains errors for scanning and the execution will stop now!!!')
+                       t.print_token_error()
+                       sys.exit()
+                    else:
+                       current_pos = f_read.tell()
+                       current_pos -= 1
+                       f_read.seek(current_pos)
+                       break
+                else:
+                    t.name += next_ch
+            return t
+
         elif ((current_ch == '\n') or (current_ch.isspace())):
             t.type = 'delimiters'
             t.name = current_ch
@@ -149,7 +170,6 @@ class Scanner(object):
               print('Input program contains errors for scanning and the execution will stop now!!!')
               t.print_token_error()
               sys.exit()
-              #return t
 
 
 scanner = Scanner(sys.argv[1])
@@ -159,4 +179,3 @@ while scanner.has_more_tokens():
          t.print_token_with_csc512()
     else:
         t.print_token()
-print('The program finshed running sucessfully, please check the *_gen.c file for the output')
