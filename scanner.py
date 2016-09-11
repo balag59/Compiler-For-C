@@ -5,12 +5,12 @@ class Token(object):
 
     def get_token_type(self):
         if self.type != "delimiters":
-            print(self.type)
+           print(self.type)
         return self.type
 
     def get_token_name(self):
-        if self.name != '\n':
-            print(self.name)
+        if self.type != "delimiters":
+          print(self.name)
         return self.name
 
 class Scanner(object):
@@ -102,7 +102,7 @@ class Scanner(object):
                 else:
                     t.name += next_ch
             return t
-        elif current_ch == '\n':
+        elif ((current_ch == '\n') or (current_ch.isspace())):
             t.type = 'delimiters'
             t.name = current_ch
             return t
