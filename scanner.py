@@ -20,6 +20,9 @@ class Token(object):
     def print_token_with_csc512(self):
         f_write.write("csc512" + self.name)
 
+    def print_token_error(self):
+        f_write.write("\n The input program contains errors for scanning and the execution will stop now!!!")
+
 
 class Scanner(object):
     def __init__(self,prog_name):
@@ -143,7 +146,10 @@ class Scanner(object):
                       break
               t.type = "unknown"
               t.name  = "error"
-              return t
+              print('Input program contains errors for scanning and the execution will stop now!!!')
+              t.print_token_error()
+              sys.exit()
+              #return t
 
 
 scanner = Scanner(sys.argv[1])
@@ -153,3 +159,4 @@ while scanner.has_more_tokens():
          t.print_token_with_csc512()
     else:
         t.print_token()
+print('The program finshed running sucessfully, please check the *_gen.c file for the output')
