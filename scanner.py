@@ -18,7 +18,7 @@ class Token(object):
         f_write.write(self.name)
 
     def print_token_with_csc512(self):
-        f_write.write("csc512" + self.name)
+        f_write.write("cs512" + self.name)
 
     def print_token_error(self):
         f_write.write("\n The input program contains errors for scanning and the execution will stop now!!!")
@@ -130,13 +130,6 @@ class Scanner(object):
             while True:
                 next_ch = f_read.read(1)
                 if not(next_ch.isdigit()):
-                    if(next_ch.isalpha() or next_ch == '_'):
-                       t.type = "unknown"
-                       t.name  = "error"
-                       print('Input program contains errors for scanning and the execution will stop now!!!')
-                       t.print_token_error()
-                       sys.exit()
-                    else:
                        current_pos = f_read.tell()
                        current_pos -= 1
                        f_read.seek(current_pos)
