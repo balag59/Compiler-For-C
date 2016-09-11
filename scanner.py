@@ -117,7 +117,10 @@ class Scanner(object):
                   if current_ch == symbol:
                       t.name = current_ch
                       t.type = "symbol"
-                      #next_ch = f.read(1)
+                      next_ch = f.read(1)
+                      for sym in symbol_list:
+                          if(current_ch + next_ch == sym):
+                              t.name = sym
                       return t
                       break
               t.type = "unknown"
