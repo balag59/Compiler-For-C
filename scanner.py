@@ -50,6 +50,9 @@ class Scanner(object):
                      break
                  else:
                      t.name += next_ch
+             else:
+                 t.type  = "symbol"
+                 t.name = '/'  
              return t
         elif current_ch == '"':
              t.name = current_ch
