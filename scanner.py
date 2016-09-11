@@ -4,11 +4,13 @@ class Token(object):
         self.name = ""
 
     def get_token_type(self):
-        print(self.type)
+        if self.type != "delimiters":
+            print(self.type)
         return self.type
 
     def get_token_name(self):
-        print(self.name)
+        if self.name != '\n':
+            print(self.name)
         return self.name
 
 class Scanner(object):
@@ -31,10 +33,13 @@ class Scanner(object):
         t = Token()
         if current_ch == '#':
             t.name = current_ch
-            t.type  = "meta"
+            t.type  = "meta statement"
             while True:
               next_ch = f.read(1)
               if next_ch == '\n':
+                  cur_pos = f.tell()
+                  cur_pos -= 1
+                  f.seek(cur_pos)
                   break
               else:
                 t.name += next_ch
@@ -43,16 +48,22 @@ class Scanner(object):
              next_ch = f.read(1)
              if next_ch == '/':
                t.name = "//"
-               t.type  = "meta"
+               t.type  = "meta statement"
                while True:
                  next_ch = f.read(1)
                  if next_ch == '\n':
+                     cur_pos = f.tell()
+                     cur_pos -= 1
+                     f.seek(cur_pos)
                      break
                  else:
                      t.name += next_ch
              else:
                  t.type  = "symbol"
-                 t.name = '/'  
+                 t.name = '/'
+                 cur_pos = f.tell()
+                 cur_pos -= 1
+                 f.seek(cur_pos)
              return t
         elif current_ch == '"':
              t.name = current_ch
@@ -61,21 +72,45 @@ class Scanner(object):
                next_ch = f.read(1)
                if next_ch == '"':
                    t.name += next_ch
-                   end_ch = ' '
-                   while True:
-                       if (end_ch == ' '):
-                            end_ch = f.read(1)
-                       else:
-                           break
                    break
                else:
                  t.name += next_ch
              return t
-        #elif current_ch
+        elif current_ch.isalpha():
+            t.name = current_ch
+            t.type = "identifier"
+            while True:
+                next_ch = f.read(1)
+                if not(next_ch.isalnum()):
+                    cur_pos = f.tell()
+                    cur_pos -= 1
+                    f.seek(cur_pos)
+                    break
+                else:
+                    t.name += next_ch
+            return t
+        elif current_ch == '_':
+            t.name = current_ch
+            t.type = "identifier"
+            while True:
+                next_ch = f.read(1)
+                if not(next_ch.isalnum()):
+                    cur_pos = f.tell()
+                    cur_pos -= 1
+                    f.seek(cur_pos)
+                    break
+                else:
+                    t.name += next_ch
+            return t
+        elif current_ch == '\n':
+            t.type = 'delimiters'
+            t.name = current_ch
+            return t
         else:
               t.type = "unknown"
               t.name  = "error"
               return t
+
 
 
 scanner = Scanner("foo1.c")
