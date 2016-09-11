@@ -1,5 +1,5 @@
 reserve_word_list = ["int","void","if","while","return","read","write","print","continue","break","binary","decimal"]
-symbol_list = ["(",")","{","}","[","]",",",";","+","-","*","==","!=",">",">=","<","<=","=","&&","||"]
+symbol_list = ["(",")","{","}","[","]",",",";","+","-","*","==","!=",">=","<=","<",">","=","&&","||"]
 
 class Token(object):
     def __init__(self):
@@ -113,20 +113,19 @@ class Scanner(object):
             t.name = current_ch
             return t
         else:
+              next_ch = f.read(1)
               for symbol in symbol_list:
-                  if current_ch == symbol:
-                      t.name = current_ch
+                  if current_ch + next_ch == symbol:
                       t.type = "symbol"
-                      next_ch = f.read(1)
+                      t.name = symbol
+                      return t
+                      break
+                  elif current_ch == symbol:
+                      t.type = "symbol"
+                      t.name = current_ch
                       current_pos = f.tell()
                       current_pos -= 1
                       f.seek(current_pos)
-                      for sym in symbol_list:
-                          if(current_ch + next_ch == sym):
-                              t.name = sym
-                              current_pos = f.tell()
-                              current_pos += 1
-                              f.seek(current_pos)
                       return t
                       break
               t.type = "unknown"
