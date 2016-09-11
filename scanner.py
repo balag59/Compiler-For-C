@@ -15,6 +15,10 @@ class Token(object):
     def print_token(self):
         f_write.write(self.name)
 
+    def print_token_with_csc512(self):
+        f_write.write("csc512" + self.name)
+
+
 class Scanner(object):
     def __init__(self,prog_name):
         self.prog_name = prog_name
@@ -26,9 +30,6 @@ class Scanner(object):
         newprog_name = temp_name[0] + '_gen' + '.' + temp_name[1]
         global f_write
         f_write = open(newprog_name,'a')
-
-
-
 
 
     def has_more_tokens(self):
@@ -142,8 +143,10 @@ class Scanner(object):
               t.name  = "error"
               return t
 
-scanner = Scanner("foo1.c")
+scanner = Scanner("foo.c")
 while scanner.has_more_tokens():
     t = scanner.get_next_token()
-    #if ((t.get_token_type() == "identifier") and (t.get_token_name() != "main")):
-    t.print_token()
+    if ((t.get_token_type() == "identifier") and (t.get_token_name() != "main")):
+         t.print_token_with_csc512()
+    else:
+        t.print_token()
