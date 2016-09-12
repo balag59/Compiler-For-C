@@ -100,7 +100,7 @@ class Scanner(object):
             t.type = "identifier"
             while True:
                 next_ch = f_read.read(1)
-                if not(next_ch.isalnum()):
+                if not(next_ch.isalnum() or next_ch == '_'):
                     current_pos = f_read.tell()
                     current_pos -= 1
                     f_read.seek(current_pos)
@@ -116,7 +116,7 @@ class Scanner(object):
             t.type = "identifier"
             while True:
                 next_ch = f_read.read(1)
-                if not(next_ch.isalnum()):
+                if not(next_ch.isalnum() or next_ch == '_'):
                     current_pos = f_read.tell()
                     current_pos -= 1
                     f_read.seek(current_pos)
