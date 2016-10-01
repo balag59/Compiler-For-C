@@ -20,7 +20,6 @@ firstset_change = True
 while(firstset_change):
  for p in P:
    A = p.split("->")[0]
-   print(A)
    beta = p.split("->")[1]
    beta = beta.split('|')
    rhs = set()
@@ -34,10 +33,11 @@ while(firstset_change):
           i += 1
       if(i == k and 'empty' in first[b[k]]):
           rhs = rhs | empty
-      first[A] = first[A] | rhs
-   if(prev_first == first):
-        firstset_change = False
-   prev_first = first
+      if(rhs not in first[A]):
+          first[A] = first[A] | rhs
+ if(prev_first == first):
+       firstset_change = False
+ prev_first = first.copy()
 
 for nt in NT:
     print(nt)
