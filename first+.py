@@ -1,5 +1,5 @@
 import sys
-
+import itertools
 
 P = ["expr->term expr'","expr'->+ term expr'|- term expr'|empty","term->factor term'","term'->* factor term'|/ factor term'|empty","factor->( expr )|num|name"]
 T = {'+','-','*','/','name','num','(',')'}
@@ -89,7 +89,16 @@ for p in P:
            else:
                first_plus[key] = first[b[0]] | follow[A]
 
+for p in P:
+        A = p.split("->")[0]
+        beta = p.split("->")[1]
+        beta = beta.split('|')
+        if(len(beta)) > 1:
+             for i, j in itertools.combinations(beta, 2):
+                     k1 = A + '->' + i
+                     k2 = A + '->' + j
+                     if(first_plus[k1] & first_plus[k2]):
+                         print('not backtrack free')
+                         exit()
 
-for symbol in first_plus:
-    print(symbol)
-    print(first_plus[symbol])
+print('backtrack free')
