@@ -119,6 +119,8 @@ for nt in NT:
                  table[(A,t)] = key
              if('eof' in first_plus[key]):
                  table[(A,'eof')] = key
+             else:
+                table[(A,'eof')] = 'error'      
 
 for key in table:
     print(key)
