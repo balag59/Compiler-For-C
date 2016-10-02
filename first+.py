@@ -74,3 +74,22 @@ while(followset_change):
  if(prev_follow == follow):
       followset_change = False
  prev_follow = follow.copy()
+
+first_plus  = {}
+
+for p in P:
+        A = p.split("->")[0]
+        beta = p.split("->")[1]
+        beta = beta.split('|')
+        for item in beta:
+           b = item.split(' ')
+           key = A + '->' + item
+           if('empty' not in first[b[0]]):
+               first_plus[key] = first[b[0]]
+           else:
+               first_plus[key] = first[b[0]] | follow[A]
+
+
+for symbol in first_plus:
+    print(symbol)
+    print(first_plus[symbol])
