@@ -98,7 +98,28 @@ for p in P:
                      k1 = A + '->' + i
                      k2 = A + '->' + j
                      if(first_plus[k1] & first_plus[k2]):
-                         print('not backtrack free')
+                         print('this grammar is not backtrack free')
                          exit()
 
-print('backtrack free')
+print('this grammar is backtrack free')
+
+table = {}
+
+for nt in NT:
+    for t in T:
+        table[(nt,t)] = 'error'
+    for p in P:
+        A = p.split("->")[0]
+        beta = p.split("->")[1]
+        beta = beta.split('|')
+        for item in beta:
+            key = A + '->' + item
+            for t in T:
+             if t in first_plus[key]:
+                 table[(A,t)] = key
+             if('eof' in first_plus[key]):
+                 table[(A,'eof')] = key
+
+for key in table:
+    print(key)
+    print(table[key])
