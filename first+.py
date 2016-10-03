@@ -6,7 +6,21 @@ T = {'+','-','*','/','name','num','(',')'}
 empty = {'empty'}
 eof = {'eof'}
 NT = {'expr','term',"expr'","term'",'factor'}
+Str= 'a*b+c'
 S = 'expr'
+
+pos = -1
+def NextWord():
+    global pos
+    pos += 1
+    if(pos < len(Str)):
+        if(Str[pos].isalpha()):
+            return 'name'
+        else:
+            return Str[pos]
+    else:
+      return 'eof'
+
 
 first = {}
 prev_first = {}
@@ -23,7 +37,10 @@ while(firstset_change):
  for p in P:
    A = p.split("->")[0]
    beta = p.split("->")[1]
-   beta = beta.split('|')
+   if(beta.count("||") >=1):
+     beta = beta.split('|',maxsplit=1)
+   else:
+     beta = beta.split('|')
    rhs = set()
    for b in beta:
       b = b.split(' ')
@@ -48,7 +65,7 @@ prev_follow = {}
 for nt in NT:
     follow[nt] = set()
 
-follow[S] = follow[S] | eof
+follow['expr'] = follow['expr'] | eof
 
 followset_change = True
 
@@ -56,7 +73,10 @@ while(followset_change):
  for p in P:
         A = p.split("->")[0]
         beta = p.split("->")[1]
-        beta = beta.split('|')
+        if(beta.count("||") >=1):
+          beta = beta.split('|',maxsplit=1)
+        else:
+          beta = beta.split('|')
         trailer = set()
         for b in beta:
            b = b.split(' ')
@@ -80,7 +100,10 @@ first_plus  = {}
 for p in P:
         A = p.split("->")[0]
         beta = p.split("->")[1]
-        beta = beta.split('|')
+        if(beta.count("||") >=1):
+          beta = beta.split('|',maxsplit=1)
+        else:
+          beta = beta.split('|')
         for item in beta:
            b = item.split(' ')
            key = A + '->' + item
@@ -92,16 +115,19 @@ for p in P:
 for p in P:
         A = p.split("->")[0]
         beta = p.split("->")[1]
-        beta = beta.split('|')
+        if(beta.count("||") >=1):
+          beta = beta.split('|',maxsplit=1)
+        else:
+          beta = beta.split('|')
         if(len(beta)) > 1:
              for i, j in itertools.combinations(beta, 2):
                      k1 = A + '->' + i
                      k2 = A + '->' + j
                      if(first_plus[k1] & first_plus[k2]):
-                         print('this grammar is not backtrack free')
+                         print('this grammar is not LL(1)')
                          exit()
 
-print('this grammar is backtrack free')
+print('this grammar is LL(1)')
 
 table = {}
 
@@ -111,7 +137,10 @@ for nt in NT:
     for p in P:
         A = p.split("->")[0]
         beta = p.split("->")[1]
-        beta = beta.split('|')
+        if(beta.count("||") >=1):
+          beta = beta.split('|',maxsplit=1)
+        else:
+          beta = beta.split('|')
         for item in beta:
             key = A + '->' + item
             for t in T:
@@ -120,8 +149,33 @@ for nt in NT:
              if('eof' in first_plus[key]):
                  table[(A,'eof')] = key
              else:
-                table[(A,'eof')] = 'error'      
+                table[(A,'eof')] = 'error'
 
-for key in table:
-    print(key)
-    print(table[key])
+stack = []
+word = NextWord()
+stack.append('eof')
+stack.append(S)
+while(True):
+    if(stack[-1] == 'eof' and word == 'eof'):
+        print('parse success')
+        exit()
+    elif(stack[-1] in T or stack[-1] == 'eof'):
+        if(stack[-1] == word):
+            stack.pop()
+            word = NextWord()
+        else:
+            print('error looking for symbol at top of the stack')
+            exit()
+    else:
+        if(table[(stack[-1],word)] != 'error'):
+            prod = table[(stack[-1],word)].split('->')
+            beta = prod[1].split(' ')
+            beta.reverse()
+            stack.pop()
+            for b in beta:
+                if(b != 'empty'):
+                   stack.append(b)
+
+        else:
+            print('error expanding focus')
+            exit()
