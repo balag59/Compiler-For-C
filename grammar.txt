@@ -1,0 +1,41 @@
+expression->term expression1
+term->factor term1
+term1->mulop factor term1|empty
+mulop->*|/
+factor->id factor1|number|- number|( expression )
+factor1->empty|[ expression ]|( expression )
+expression1->addop term expression1|empty
+addop->+|-
+block_statements->{ statements }
+statements->empty|statement statements
+statement->assignment|func_call|if_statement|while_statement|return_statement|break_statement|continue_statement|read ( id ) ;|print ( string ) ;
+assignment->id = expression ;
+func_call->id ( expr_list ) ;
+expr_list->empty|non_empty_expr_list
+non_empty_expr_list->expression non_empty_expr_list1
+non_empty_expr_list1->, expression non-empty-expr-list1
+if_statement-> if ( condition_expression ) blockstatements
+condition_expression->condition condition_expression1
+condition_expression1->empty|condition_op condition_expression1
+condition_op->&&|||
+condition->expression comparison_op expression
+comparison_op->==|!=|>|>=|<=
+while_statement->while ( condition_expression ) block_statements
+return_statement-> return return_statement1
+return_statement1->expression ;|;
+break_statement-> break ;
+continue_statement->continue ;
+program->data_decls func_list
+func_list->func func_list|empty
+func->func_decl func1
+func1->;|{ data_decls statements }
+func_decl->type_name id ( parameter_list )
+type_name->int|void|binary|decimal
+parameter_list->empty|void|non_empty_list
+non_empty_list->type_name id non_empty_list1
+non_empty_list1->, type_name id non_empty_list1|empty
+data_decls->empty|type_name id_list ; data_decls
+id_list->id id_list1
+id_list1->, id id_list1|empty
+id->id id1
+id1->empty|[ expression ]
