@@ -385,5 +385,5 @@ while(True):
         else:
             print(stack[-1])
             print(word)
-            print('error expanding focus')
+            print('error parsing the program')
             exit()

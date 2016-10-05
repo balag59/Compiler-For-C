@@ -32,7 +32,7 @@ condition_expression->condition condition_expression1
 condition_expression1->empty|condition_op condition
 condition_op->&&|||
 condition->expression comparison_op expression
-comparison_op->==|!=|>|>=|<=
+comparison_op->==|!=|>|>=|<=|<
 while_statement->while ( condition_expression ) block_statements
 return_statement->return return_statement1
 return_statement1->expression ;|;
