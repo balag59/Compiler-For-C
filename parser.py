@@ -1,16 +1,19 @@
 import sys
 import itertools
 
-
+#list of Terminals in the grammar
 T = {';','{','}','ID','(',')','int','void','binary','decimal',',','[',']','{','}','read','write','string','=','&&','||','==','!=','>'
      ,'>=','<','<=','while','return','break','continue','+','-','*','/','number','print','if'}
+#list of Non-Terminals in the grammar
 NT = {'program','data_decls','func_list','func','func_decl','func1','type_name','parameter_list','non_empty_list','non_empty_list1','id_list','id_list1','id','id1','expression','block_statements','statements','statement','assignment','func_call','if_statement','while_statement','return_statement','break_statement'\
       ,'continue_statement','expr_list','non_empty_expr_list','non_empty_expr_list1','condition_expression','condition_expression1','condition_op','condition','comparison_op','return_statement1','expression1','term','factor','term1','mulop','factor1','addop','parameter_list1','program1','program2','program3','program4','assignment1','statement1'}
 
+#start,empty and end of file symbols
 S = 'program'
 empty = {'empty'}
 eof = {'eof'}
 
+#open and read the grammar file to get all the production rules
 f_grammar = open('grammar.txt','r')
 P = []
 for line in f_grammar:
@@ -192,12 +195,13 @@ class Scanner(object):
               t.type = "unknown"
               t.name  = "error"
               #print error message to terminal
-              print('Input program contains errors for scanning and the execution will stop now!!!')
-              t.print_token_error()
+              print('Error in Scanner:Invalid token in source file')
               exit()
 
+#create a new scanner
 scanner = Scanner(sys.argv[1])
 
+#get the next word from the input program through the scanner
 def NextWord():
     if scanner.has_more_tokens():           #while there are any more tokens left in the input test program
         t = scanner.get_next_token()           #fetch the next valid token
@@ -213,8 +217,7 @@ def NextWord():
        return 'eof'
 
 
-
-
+#computing first sets for all the symbols in the grammar
 first = {}
 prev_first = {}
 
@@ -251,7 +254,7 @@ while(firstset_change):
  prev_first = first.copy()
 
 
-
+#computing follow sets for all the symbols in the grammar
 follow = {}
 prev_follow = {}
 
@@ -288,7 +291,7 @@ while(followset_change):
       followset_change = False
  prev_follow = follow.copy()
 
-
+#computing First+ sets using the first and follow sets
 first_plus  = {}
 
 for p in P:
@@ -306,6 +309,7 @@ for p in P:
            else:
                first_plus[key] = first[b[0]] | follow[A]
 
+#checking for LL(1) grammar condition using First+ sets
 for p in P:
         A = p.split("->")[0]
         beta = p.split("->")[1]
@@ -321,7 +325,7 @@ for p in P:
                          print('this grammar is not LL(1)')
                          exit()
 
-
+#creating the LL(1) parser table using the First+ sets
 table = {}
 
 for nt in NT:
@@ -342,7 +346,7 @@ for nt in NT:
              if('eof' in first_plus[key]):
                  table[(A,'eof')] = key
 
-
+#creating a table driven LL(1) parser using LL(1) table and the next input token from the scanner
 num_functions = 0
 num_statements = 0
 num_variables = 0
