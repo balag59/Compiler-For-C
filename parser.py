@@ -17,7 +17,6 @@ for line in f_grammar:
     P.append(line.strip('\n'))
 
 
-
 #list of valid reserved keywords supported
 reserve_word_list = ["int","void","if","while","return","read","write","print","continue","break","binary","decimal"]
 
@@ -307,8 +306,6 @@ for p in P:
            else:
                first_plus[key] = first[b[0]] | follow[A]
 
-
-
 for p in P:
         A = p.split("->")[0]
         beta = p.split("->")[1]
@@ -321,13 +318,8 @@ for p in P:
                      k1 = A + '->' + i
                      k2 = A + '->' + j
                      if(first_plus[k1] & first_plus[k2]):
-                         print(A)
-                         print(first_plus[k1])
-                         print(first_plus[k2])
                          print('this grammar is not LL(1)')
                          exit()
-
-print('this grammar is LL(1)')
 
 
 table = {}
@@ -351,7 +343,9 @@ for nt in NT:
                  table[(A,'eof')] = key
 
 
-
+num_functions = 0
+num_statements = 0
+num_variables = 0
 stack = []
 word = NextWord()
 while(word == 'error'):
@@ -360,7 +354,7 @@ stack.append('eof')
 stack.append(S)
 while(True):
     if(stack[-1] == 'eof' and word == 'eof'):
-        print('pass')
+        print('pass variable' , num_variables ,'function' , num_functions , 'statement' , num_statements)
         exit()
     elif(stack[-1] in T or stack[-1] == 'eof'):
         if(stack[-1] == word):
@@ -374,7 +368,21 @@ while(True):
     else:
 
         if(table[(stack[-1],word)] != 'error'):
+            if(stack[-1] == 'statement'):
+                num_statements += 1
             prod = table[(stack[-1],word)].split('->')
+            if(prod[1] == 'type_name id_list ; data_decls' or prod[1] == ', id id_list1'):
+              num_variables += 1
+            if(prod[1] == 'type_name ID ( parameter_list )'):
+                num_functions += 1
+            if(stack[-1] == 'program2' and word != '('):
+                num_variables += 1
+            if(stack[-1] == 'program2' and word == '('):
+                num_functions += 1
+            if(stack[-1] == 'func1' and word == ';'):
+                num_functions -= 1
+            if(stack[-1] == 'program3' and word == ';'):
+                num_functions -= 1
             beta = prod[1].split(' ')
             beta.reverse()
             stack.pop()
@@ -383,7 +391,5 @@ while(True):
                    stack.append(b)
 
         else:
-            print(stack[-1])
-            print(word)
             print('error parsing the program')
             exit()
