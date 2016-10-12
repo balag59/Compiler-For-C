@@ -395,5 +395,5 @@ while(True):
                    stack.append(b)
 
         else:
-            print('error parsing the program')
+            print('fail:error parsing the program')
             exit()
