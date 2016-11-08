@@ -221,7 +221,9 @@ def NextWord():
        return 'eof'
 
 line_begin = []
+printed_pos = []
 num_lines = 0
+prev_pos = -1
 
 for line in f_line:
     num_lines += 1
@@ -232,10 +234,8 @@ for i in range(num_lines):
   line_begin.append(f_line.tell())
   f_line.readline()
 
-print(line_begin)
-
-def StatementParser():
-  print('StatementParser')
+def PrintLine(param):
+ if not(f_read.closed):
   temp_pos = f_read.tell()
   seek_pos = f_read.tell()
   for pos in line_begin:
@@ -243,10 +243,12 @@ def StatementParser():
           temp_pos = prev_pos
           break
       prev_pos = pos
-  f_read.seek(prev_pos)
-  statement = f_read.readline()
-  print(statement)
-  f_read.seek(seek_pos)
+  if(prev_pos not in printed_pos):
+     f_read.seek(prev_pos)
+     line = f_read.readline()
+     print(line)
+     printed_pos.append(prev_pos)
+     f_read.seek(seek_pos)
 
 #computing first sets for all the symbols in the grammar
 first = {}
@@ -406,7 +408,7 @@ while(True):
         if(table[(stack[-1],word)] != 'error'):
             if(stack[-1] == 'statement'):
                 num_statements += 1
-                StatementParser()
+            PrintLine(stack[-1])
             prod = table[(stack[-1],word)].split('->')
             if(prod[1] == 'type_name id_list ; data_decls' or prod[1] == ', id id_list1'):
               num_variables += 1
