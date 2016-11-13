@@ -1,5 +1,6 @@
 import sys
 import itertools
+import io
 
 #list of Terminals in the grammar
 T = {';','{','}','ID','(',')','int','void','binary','decimal',',','[',']','{','}','read','write','string','=','&&','||','==','!=','>'
@@ -13,6 +14,59 @@ NT = {'program','data_decls','func_list','func','func_decl','func1','type_name',
 S = 'program'
 empty = {'empty'}
 eof = {'eof'}
+
+Action = {}
+Action[('0','ID')] = 's5'
+Action[('0','(')] = 's4'
+Action[('1','+')] = 's6'
+Action[('1','eof')] = 'accept'
+Action[('2','+')] = 'rE->T1'
+Action[('2','*')] = 's7'
+Action[('2',')')] = 'rE->T1'
+Action[('2','eof')] = 'rE->T1'
+Action[('3','+')] = 'rT->F1'
+Action[('3','*')] = 'rT->F1'
+Action[('3',')')] = 'rT->F1'
+Action[('3','eof')] = 'rT->F1'
+Action[('4','ID')] = 's5'
+Action[('4','(')] = 's4'
+Action[('5','+')] = 'rF->ID1'
+Action[('5','*')] = 'rF->ID1'
+Action[('5',')')] = 'rF->ID1'
+Action[('5','eof')] = 'rF->ID1'
+Action[('6','ID')] = 's5'
+Action[('6','(')] = 's4'
+Action[('7','ID')] = 's5'
+Action[('7','(')] = 's4'
+Action[('8','+')] = 's6'
+Action[('8',')')] = 's11'
+Action[('9','+')] = 'rE->E+T3'
+Action[('9','*')] = 's7'
+Action[('9',')')] = 'rE->E+T3'
+Action[('9','eof')] = 'rE->E+T3'
+Action[('10','+')] = 'rT->T*F3'
+Action[('10','*')] = 'rT->T*F3'
+Action[('10',')')] = 'rT->T*F3'
+Action[('10','eof')] = 'rT->T*F3'
+Action[('11','+')] = 'rF->(E)3'
+Action[('11','*')] = 'rF->(E)3'
+Action[('11',')')] = 'rF->(E)3'
+Action[('11','eof')] = 'rF->(E)3'
+
+Goto = {}
+Goto[('0','E')] = '1'
+Goto[('0','T')] = '2'
+Goto[('0','F')] = '3'
+Goto[('4','E')] = '8'
+Goto[('4','T')] = '2'
+Goto[('4','F')] = '3'
+Goto[('6','T')] = '9'
+Goto[('6','F')] = '3'
+Goto[('7','F')] = '10'
+
+T_LR = {'ID','eof','+','*','(',')'}
+NT_LR = {'E','T','F'}
+
 
 #open and read the grammar file to get all the production rules
 f_grammar = open('grammar.txt','r')
@@ -45,14 +99,15 @@ class Token(object):
 class Scanner(object):
     def __init__(self,prog_name):
         self.prog_name = prog_name         #the input test program to be scanned for tokens
-        self.f_read= open(self.prog_name,'r')   #file pointer to read the input test program
-        self.f_line= open(self.prog_name,'r')
         self.current_ch = ''
-        temp_name = prog_name.split('.')
-        global newprog_name
-        newprog_name = " "
-        newprog_name = temp_name[0] + '_gen' + '.' + temp_name[1]
-
+        if(self.prog_name != 'dummy'):
+            self.f_read = open(self.prog_name,'r')
+            self.f_line = open(self.prog_name,'r')
+            temp_name = prog_name.split('.')
+            self.newprog_name = " "
+            newprog_name = temp_name[0] + '_gen' + '.' + temp_name[1]
+        else:
+            self.f_read = None
 
     #checks if the input test program has any more input tokens left
     def has_more_tokens(self):
@@ -135,6 +190,10 @@ class Scanner(object):
             for w in reserve_word_list:
                 if t.name == w:            #if the set of alphabets matches a valid reserved keyword
                     t.type = "reserved word"
+            if(t.name[-3:] == 'eof'):
+                current_pos = self.f_read.tell()
+                current_pos -= 2
+                self.f_read.seek(current_pos)
             return t
 
         #checking for identifiers that start with an _
@@ -199,7 +258,7 @@ class Scanner(object):
 
 #create a new scanner
 scanner_LL = Scanner(sys.argv[1])
-scanner_LR = Scanner('tempfile.txt')
+scanner_LR = Scanner('dummy')
 
 
 #get the next word from the input program through the scanner
@@ -208,6 +267,9 @@ def NextWord(scanner):
         t = scanner.get_next_token()           #fetch the next valid token
         #print(t.get_token_name())
         if (t.get_token_type() == "ID" or t.get_token_type() == "number" or t.get_token_type() == "string"):
+            if(t.get_token_name() == 'eof'):
+                return 'eof'
+            else:
              return t.get_token_type()
         elif(t.get_token_type() == "meta statement" or t.get_token_type() == "delimiters"):
              return 'error'
@@ -218,19 +280,21 @@ def NextWord(scanner):
     else:
          return 'eof'
 
-line_begin = []
-printed_pos = []
-num_lines = 0
-prev_pos = -1
+def GetLineBeginning():
+    global line_begin,printed_pos,prev_pos
+    line_begin = []
+    printed_pos = []
+    num_lines = 0
+    prev_pos = -1
 
-for line in scanner_LL.f_line:
-    num_lines += 1
+    for line in scanner_LL.f_line:
+       num_lines += 1
 
-scanner_LL.f_line.seek(0)
+    scanner_LL.f_line.seek(0)
 
-for i in range(num_lines):
-  line_begin.append(scanner_LL.f_line.tell())
-  scanner_LL.f_line.readline()
+    for i in range(num_lines):
+      line_begin.append(scanner_LL.f_line.tell())
+      scanner_LL.f_line.readline()
 
 def PrintLine():
  if not(scanner_LL.f_read.closed):
@@ -249,12 +313,33 @@ def PrintLine():
      scanner_LL.f_read.seek(seek_pos)
 
 def BottomUpParse(line):
-    f_LR = open('tempfile.txt','w+')
-    f_LR.write(line)
+    scanner_LR.f_read = io.StringIO()
+    line = line.split(';')
+    expr = line[0].split('=')
+    scanner_LR.f_read.write(expr[1])
+    scanner_LR.f_read.write('eof')
+    scanner_LR.f_read.seek(0)
     LR_stack = []
-    LR_stack.append('eof')
-    LR_stack.append('s0')
-
+    LR_stack.append('0')
+    word = NextWord(scanner_LR)
+    while(word == 'error'):
+        word = NextWord(scanner_LR)
+    while(True):
+      if((Action[(LR_stack[-1],word)])[0] == 's'):
+          LR_stack.append((Action[(LR_stack[-1],word)])[1:])
+          word = NextWord(scanner_LR)
+      elif((Action[(LR_stack[-1],word)])[0] == 'r'):
+          prod = Action[(LR_stack[-1],word)].split('->')
+          beta = (prod[1])[-1]
+          A = (prod[0])[1:]
+          for i in range(int(beta)): LR_stack.pop()
+          LR_stack.append(Goto[(LR_stack[-1],A)])
+      elif((Action[(LR_stack[-1],word)])[0] == 'a'):
+          print('accepted')
+          break
+      else:
+          print('error parsing statement')
+          break
 
 
 
@@ -395,6 +480,7 @@ while(word == 'error'):
     word = NextWord(scanner_LL)
 stack.append('eof')
 stack.append(S)
+GetLineBeginning()
 while(True):
     if(stack[-1] == 'eof' and word == 'eof'):
         #print('pass variable' , num_variables ,'function' , num_functions , 'statement' , num_statements)
