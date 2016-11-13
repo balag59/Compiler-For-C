@@ -20,8 +20,6 @@ P = []
 for line in f_grammar:
     P.append(line.strip('\n'))
 
-
-
 #list of valid reserved keywords supported
 reserve_word_list = ["int","void","if","while","return","read","write","print","continue","break","binary","decimal"]
 
@@ -47,9 +45,9 @@ class Token(object):
 class Scanner(object):
     def __init__(self,prog_name):
         self.prog_name = prog_name         #the input test program to be scanned for tokens
-        global f_read,f_line
-        f_read= open(self.prog_name,'r')   #file pointer to read the input test program
-        f_line= open(self.prog_name,'r')
+        self.f_read= open(self.prog_name,'r')   #file pointer to read the input test program
+        self.f_line= open(self.prog_name,'r')
+        self.current_ch = ''
         temp_name = prog_name.split('.')
         global newprog_name
         newprog_name = " "
@@ -58,64 +56,62 @@ class Scanner(object):
 
     #checks if the input test program has any more input tokens left
     def has_more_tokens(self):
-        global current_ch
-        current_ch = f_read.read(1) #current_ch stores the value of the current character being scanned
-        if current_ch != '':
+        self.current_ch = self.f_read.read(1) #self.current_ch stores the value of the current character being scanner
+        if self.current_ch != '':
             return True
         else:
-            f_read.close()   #close both the input and the output files if there are no more tokens left
+            self.f_read.close()   #close both the input and the output files if there are no more tokens left
             return False
 
     #retrieves the next valid token from the input file
     def get_next_token(self):
-        global current_ch
         t = Token()
         #Now we start checking each scanned character and create its corresponding Token
 
         #checking for # define meta statements
-        if current_ch == '#':
-            t.name = current_ch        #the token attributes are being populated
+        if self.current_ch == '#':
+            t.name = self.current_ch        #the token attributes are being populated
             t.type  = "meta statement"
             while True:
-              next_ch = f_read.read(1)  #next_ch contains the next scanned character after the current character
+              next_ch = self.f_read.read(1)  #next_ch contains the next scanned character after the current character
               if next_ch == '\n':
-                  current_pos = f_read.tell()
+                  current_pos = self.f_read.tell()
                   current_pos -= 1
-                  f_read.seek(current_pos)
+                  self.f_read.seek(current_pos)
                   break
               else:
                 t.name += next_ch
             return t
 
         #checking for //meta statements and the / operator
-        elif current_ch == '/':
-             next_ch = f_read.read(1)
+        elif self.current_ch == '/':
+             next_ch = self.f_read.read(1)
              if next_ch == '/':        # if 2 consecutive // are found then its a meta statement
                t.name = "//"
                t.type  = "meta statement"
                while True:
-                 next_ch = f_read.read(1)
+                 next_ch = self.f_read.read(1)
                  if next_ch == '\n':
-                     current_pos = f_read.tell()
+                     current_pos = self.f_read.tell()
                      current_pos -= 1
-                     f_read.seek(current_pos)
+                     self.f_read.seek(current_pos)
                      break
                  else:
                      t.name += next_ch
              else:
                  t.type  = "symbol"       #if only a single / is found then its just a symbol
                  t.name = '/'
-                 current_pos = f_read.tell()
+                 current_pos = self.f_read.tell()
                  current_pos -= 1
-                 f_read.seek(current_pos)
+                 self.f_read.seek(current_pos)
              return t
 
         #checking for strings starting and ending with ""
-        elif current_ch == '"':
-             t.name = current_ch
+        elif self.current_ch == '"':
+             t.name = self.current_ch
              t.type  = "string"
              while True:
-               next_ch = f_read.read(1)
+               next_ch = self.f_read.read(1)
                if next_ch == '"':
                    t.name += next_ch
                    break
@@ -124,15 +120,15 @@ class Scanner(object):
              return t
 
         #checking for identifiers that start with an alphabet and keywords
-        elif current_ch.isalpha():
-            t.name = current_ch
+        elif self.current_ch.isalpha():
+            t.name = self.current_ch
             t.type = "ID"
             while True:
-                next_ch = f_read.read(1)
+                next_ch = self.f_read.read(1)
                 if not(next_ch.isalnum() or next_ch == '_'):
-                    current_pos = f_read.tell()
+                    current_pos = self.f_read.tell()
                     current_pos -= 1
-                    f_read.seek(current_pos)
+                    self.f_read.seek(current_pos)
                     break
                 else:
                     t.name += next_ch
@@ -142,56 +138,56 @@ class Scanner(object):
             return t
 
         #checking for identifiers that start with an _
-        elif current_ch == '_':
-            t.name = current_ch
+        elif self.current_ch == '_':
+            t.name = self.current_ch
             t.type = "ID"
             while True:
-                next_ch = f_read.read(1)
+                next_ch = self.f_read.read(1)
                 if not(next_ch.isalnum() or next_ch == '_'):
-                    current_pos = f_read.tell()
+                    current_pos = self.f_read.tell()
                     current_pos -= 1
-                    f_read.seek(current_pos)
+                    self.f_read.seek(current_pos)
                     break
                 else:
                     t.name += next_ch
             return t
 
         #checking for numbers
-        elif current_ch.isdigit():
-            t.name = current_ch
+        elif self.current_ch.isdigit():
+            t.name = self.current_ch
             t.type = "number"
             while True:
-                next_ch = f_read.read(1)
+                next_ch = self.f_read.read(1)
                 if not(next_ch.isdigit()):
-                       current_pos = f_read.tell()
+                       current_pos = self.f_read.tell()
                        current_pos -= 1
-                       f_read.seek(current_pos)
+                       self.f_read.seek(current_pos)
                        break
                 else:
                     t.name += next_ch
             return t
 
         #checking for end of line or space characters
-        elif ((current_ch == '\n') or (current_ch.isspace())):
+        elif ((self.current_ch == '\n') or (self.current_ch.isspace())):
             t.type = "delimiters"
-            t.name = current_ch
+            t.name = self.current_ch
             return t
 
         #checking the remaining possibilities i.e. it's either a symbol or an illegal token
         else:
-              next_ch = f_read.read(1)
+              next_ch = self.f_read.read(1)
               for symbol in symbol_list:
-                  if current_ch + next_ch == symbol:   #checks for symbols with 2 characters like && == >= etc
+                  if self.current_ch + next_ch == symbol:   #checks for symbols with 2 characters like && == >= etc
                       t.type = "symbol"
                       t.name = symbol
                       return t
                       break
-                  elif current_ch == symbol:           #checks for symbols with one character like ( } ; etc
+                  elif self.current_ch == symbol:           #checks for symbols with one character like ( } ; etc
                       t.type = "symbol"
-                      t.name = current_ch
-                      current_pos = f_read.tell()
+                      t.name = self.current_ch
+                      current_pos = self.f_read.tell()
                       current_pos -= 1
-                      f_read.seek(current_pos)
+                      self.f_read.seek(current_pos)
                       return t
                       break
               # if no valid token can be formed then report an error while scanning and quit the program
@@ -202,13 +198,15 @@ class Scanner(object):
               exit()
 
 #create a new scanner
-scanner = Scanner(sys.argv[1])
+scanner_LL = Scanner(sys.argv[1])
+scanner_LR = Scanner('tempfile.txt')
+
 
 #get the next word from the input program through the scanner
-def NextWord():
+def NextWord(scanner):
     if scanner.has_more_tokens():           #while there are any more tokens left in the input test program
         t = scanner.get_next_token()           #fetch the next valid token
-    #    print(t.get_token_name())
+        #print(t.get_token_name())
         if (t.get_token_type() == "ID" or t.get_token_type() == "number" or t.get_token_type() == "string"):
              return t.get_token_type()
         elif(t.get_token_type() == "meta statement" or t.get_token_type() == "delimiters"):
@@ -218,37 +216,47 @@ def NextWord():
         else:
             return 'error'
     else:
-       return 'eof'
+         return 'eof'
 
 line_begin = []
 printed_pos = []
 num_lines = 0
 prev_pos = -1
 
-for line in f_line:
+for line in scanner_LL.f_line:
     num_lines += 1
 
-f_line.seek(0)
+scanner_LL.f_line.seek(0)
 
 for i in range(num_lines):
-  line_begin.append(f_line.tell())
-  f_line.readline()
+  line_begin.append(scanner_LL.f_line.tell())
+  scanner_LL.f_line.readline()
 
-def PrintLine(param):
- if not(f_read.closed):
-  temp_pos = f_read.tell()
-  seek_pos = f_read.tell()
+def PrintLine():
+ if not(scanner_LL.f_read.closed):
+  temp_pos = scanner_LL.f_read.tell()
+  seek_pos = scanner_LL.f_read.tell()
   for pos in line_begin:
       if(temp_pos < pos):
           temp_pos = prev_pos
           break
       prev_pos = pos
   if(prev_pos not in printed_pos):
-     f_read.seek(prev_pos)
-     line = f_read.readline()
-     print(line)
+     scanner_LL.f_read.seek(prev_pos)
+     line = scanner_LL.f_read.readline()
+     BottomUpParse(line)
      printed_pos.append(prev_pos)
-     f_read.seek(seek_pos)
+     scanner_LL.f_read.seek(seek_pos)
+
+def BottomUpParse(line):
+    f_LR = open('tempfile.txt','w+')
+    f_LR.write(line)
+    LR_stack = []
+    LR_stack.append('eof')
+    LR_stack.append('s0')
+
+
+
 
 #computing first sets for all the symbols in the grammar
 first = {}
@@ -381,47 +389,32 @@ for nt in NT:
 
 
 #creating a table driven LL(1) parser using LL(1) table and the next input token from the scanner
-num_functions = 0
-num_statements = 0
-num_variables = 0
 stack = []
-word = NextWord()
+word = NextWord(scanner_LL)
 while(word == 'error'):
-    word = NextWord()
+    word = NextWord(scanner_LL)
 stack.append('eof')
 stack.append(S)
 while(True):
     if(stack[-1] == 'eof' and word == 'eof'):
-        print('pass variable' , num_variables ,'function' , num_functions , 'statement' , num_statements)
+        #print('pass variable' , num_variables ,'function' , num_functions , 'statement' , num_statements)
         exit()
     elif(stack[-1] in T or stack[-1] == 'eof'):
         if(stack[-1] == word):
             stack.pop()
-            word = NextWord()
+            word = NextWord(scanner_LL)
             while(word == 'error'):
-                word = NextWord()
+                word = NextWord(scanner_LL)
         else:
             print('error looking for symbol at top of the stack')
             exit()
     else:
 
         if(table[(stack[-1],word)] != 'error'):
+            #print(table[(stack[-1],word)])
             if(stack[-1] == 'statement'):
-                num_statements += 1
-            PrintLine(stack[-1])
+                PrintLine()
             prod = table[(stack[-1],word)].split('->')
-            if(prod[1] == 'type_name id_list ; data_decls' or prod[1] == ', id id_list1'):
-              num_variables += 1
-            if(prod[1] == 'type_name ID ( parameter_list )'):
-                num_functions += 1
-            if(stack[-1] == 'program2' and word != '('):
-                num_variables += 1
-            if(stack[-1] == 'program2' and word == '('):
-                num_functions += 1
-            if(stack[-1] == 'func1' and word == ';'):
-                num_functions -= 1
-            if(stack[-1] == 'program3' and word == ';'):
-                num_functions -= 1
             beta = prod[1].split(' ')
             beta.reverse()
             stack.pop()
